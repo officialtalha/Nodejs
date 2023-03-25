@@ -1,8 +1,10 @@
 const http = require('http');
+const fs = require('fs');
 
 const server = http.createServer((req, res) => {
     console.log(req.url);
     const url = req.url;
+    const method = req.method;
     if (url === '/') {
         res.setHeader('Content-Type', 'text/html');
         res.write(`<html>
@@ -10,50 +12,42 @@ const server = http.createServer((req, res) => {
         <title>response done!</title>
         </header>
         </body>
-        <h1> This is a response from the Node js server again </h1>
+        <form action="/message" method="POST"> 
+        <input type="text" id="input-field" name="message" required>
+        <button>send</button>
+        </form>
         </body>
         </html>`);
-        res.end();
+        return res.end();
     }
 
-    if (url === '/home') {
-        res.setHeader('Content-Type', 'text/html');
-        res.write(`<html>
-        <header>
-        <title>response done!</title>
-        </header>
-        </body>
-        <h1> Welcome Home </h1>
-        </body>
-        </html>`);
-        res.end();
-    }
-    if (url === '/about') {
-        res.setHeader('Content-Type', 'text/html');
-        res.write(`<html>
-        <header>
-        <title>response done!</title>
-        </header>
-        </body>
-        <h1> Welcome To About Us Page </h1>
-        </body>
-        </html>`);
-        res.end();
-    }
+    if (url === '/message' && method === 'POST') {
+        const body = [];
+        req.on('data', (chunk) => {
+            body.push(chunk);
+        });
 
-    if (url === '/node') {
-        res.setHeader('Content-Type', 'text/html');
-        res.write(`<html>
+        return req.on('end', () => {
+            const parseBody = Buffer.concat(body).toString();
+            console.log(parseBody);
+            const msg = parseBody.split('=')[1];
+            fs.writeFile('message.txt', msg, (err) => {
+                res.statusCode = 302;
+                res.setHeader('Location', '/');
+                return res.end();
+            });
+        });
+    }
+    res.setHeader('Content-Type', 'text/html');
+    res.write(`<html>
         <header>
         <title>response done!</title>
         </header>
         </body>
-        <h1> Welcome To my Node JS Project </h1>
+        <h1> Welcome To Message Page </h1>
         </body>
         </html>`);
-        res.end();
-    }
-    
+    res.end();
 });
 
 server.listen(4000);
