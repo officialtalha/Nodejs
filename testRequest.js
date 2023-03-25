@@ -5,13 +5,15 @@ const server = http.createServer((req, res) => {
     console.log(req.url);
     const url = req.url;
     const method = req.method;
-    if (url === '/') {
+    if (url === '/') { 
+        const rf = fs.readFileSync('message.txt');
         res.setHeader('Content-Type', 'text/html');
         res.write(`<html>
         <header>
         <title>response done!</title>
         </header>
-        </body>
+        <body>
+        <p>${rf}</p>
         <form action="/message" method="POST"> 
         <input type="text" id="input-field" name="message" required>
         <button>send</button>
